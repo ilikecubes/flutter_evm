@@ -1,88 +1,52 @@
-import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html';
+import 'package:js/js.dart'
+    if (dart.library.io) 'package:webthree/lib/src/browser/js-stub.dart'
+    if (dart.library.js) 'package:js/js.dart';
+import 'package:webthree/browser.dart'
+    if (dart.library.io) 'package:webthree/lib/src/browser/dart_wrappers_stub.dart'
+    if (dart.library.js) 'package:webthree/browser.dart';
+import 'package:webthree/webthree.dart';
 
-import 'package:flutter/material.dart';
 import 'connection_provider.dart';
-import 'package:flutter_web3/flutter_web3.dart';
+
+@JS()
+@anonymous
+class JSrawRequestParams {
+  external String get chainId;
+  external factory JSrawRequestParams({String chainId});
+}
 
 class LocalConnectionProvider extends ConnectionProvider {
-  LocalConnectionProvider() : super() {
-    signer.addListener(() {
-      notifyListeners();
-    });
-  }
-
-  final signer = ValueNotifier<Signer?>(null);
+  Credentials? _credentials;
+  @override
+  Credentials? get credentials => _credentials;
 
   @override
-  Future<void> connect({int? chainID}) async {
-    debugPrint("LOCAL");
-    if (ethereum == null) {
+  Future<void> connect({required String rpcUrl, required int chainID}) async {
+    final eth = window.ethereum;
+    if (eth == null) {
       return;
     }
-    final currentChain = await ethereum!.getChainId();
-    if (currentChain != chainID) {
-      await ethereum!.walletSwitchChain(chainID ?? 56);
-    }
-    ethereum!.onConnect((info) async {
-      final accounts = await ethereum!.getAccounts();
-      currentAddress.value = accounts.first;
-      isConnected.value = true;
-      signer.value = provider?.getSigner();
-    });
-    ethereum!.onAccountsChanged((chainId) async {
-      final accounts = await ethereum!.getAccounts();
-      currentAddress.value = accounts.first;
-      isConnected.value = true;
-      signer.value = provider?.getSigner();
-    });
-    ethereum!.onDisconnect((_) {
-      currentAddress.value = "";
-      isConnected.value = false;
-      signer.value = null;
-    });
-    final accounts = await ethereum!.requestAccount();
-    if (accounts.isNotEmpty) {
-      currentAddress.value = accounts.first;
-      isConnected.value = true;
-      signer.value = provider!.getSigner();
-      notifyListeners();
-    }
-  }
-
-  @override
-  Future<String>? call({
-    String? to,
-    String? from,
-    BigInt? value,
-    BigInt? gasLimit,
-    BigInt? gasPrice,
-    int? nounce,
-    String? data,
-    BigInt? maxFeePerGas,
-    BigInt? maxPriorityFeePerGas,
-  }) {
-    if (!isConnected.value) {
-      return null;
-    }
-
-    return signer.value?.call(TransactionRequest(
-      to: to,
-      from: from,
-      value: value,
-      gasLimit: gasLimit,
-      gasPrice: gasPrice,
-      nounce: nounce,
-      data: data,
-      maxFeePerGas: maxFeePerGas,
-      maxPriorityFeePerGas: maxPriorityFeePerGas,
-    ));
+    await eth.rawRequest('wallet_switchEthereumChain', params: [
+      JSrawRequestParams(chainId: "Ox${chainID.toRadixString(16)}")
+    ]);
+    _credentials = await eth.requestAccount();
+    notifyListeners();
   }
 
   @override
   Future<void> disconnect() async {
-    currentAddress.value = "";
-    isConnected.value = false;
-    signer.value = null;
+    _credentials = null;
     notifyListeners();
   }
+
+  @override
+  bool get isConnected =>
+      credentials != null && (window.ethereum?.isConnected() ?? false);
+
+  @override
+  Web3Client? get client => window.ethereum != null && isConnected
+      ? Web3Client.custom(window.ethereum!.asRpcService())
+      : null;
 }

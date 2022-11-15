@@ -1,57 +1,45 @@
 import 'dart:async';
+import 'package:http/http.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_evm/src/credentials/wallet_connect_credentials.dart';
+import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:walletconnect_qrcode_modal_dart/walletconnect_qrcode_modal_dart.dart';
+import 'package:webthree/webthree.dart';
 import 'connection_provider.dart';
 
 class WalletConnectConnectionProvider extends ConnectionProvider {
-  WalletConnectConnectionProvider(
-      {required this.context, required WalletConnectQrCodeModal walletConnect})
-      : _walletConnect = walletConnect,
-        super() {
-    _walletConnect.registerListeners(
-      onConnect: (_) => _updateValues,
-      onSessionUpdate: (_) => _updateValues,
-      onDisconnect: _updateValues,
-    );
-  }
+  WalletConnectConnectionProvider({required this.modal, required this.context});
 
-  void _updateValues() {
-    currentAddress.value = _walletConnect.connector.session.accounts.first;
-    isConnected.value = _walletConnect.connector.connected;
+  final WalletConnectQrCodeModal modal;
+  final BuildContext context;
+
+  Web3Client? _client;
+  @override
+  Web3Client? get client => _client;
+
+  @override
+  Future<void> connect({required String rpcUrl, required int chainID}) async {
+    await modal.connect(context, chainId: chainID);
+    final provider =
+        EthereumWalletConnectProvider(modal.connector, chainId: chainID);
+    _credentials = WalletConnectCredentials(provider: provider);
+    final http = Client();
+    _client = Web3Client(rpcUrl, http);
     notifyListeners();
   }
 
-  final WalletConnectQrCodeModal _walletConnect;
-  final BuildContext context;
-
+  Credentials? _credentials;
   @override
-  Future<String>? call(
-      {String? to,
-      String? from,
-      BigInt? value,
-      BigInt? gasLimit,
-      BigInt? gasPrice,
-      int? nounce,
-      String? data,
-      BigInt? maxFeePerGas,
-      BigInt? maxPriorityFeePerGas}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> connect({int? chainID}) async {
-    debugPrint("WC");
-    final response = await _walletConnect.connect(context, chainId: chainID);
-    if (response != null) {
-      _updateValues();
-    }
-  }
+  Credentials? get credentials => _credentials;
 
   @override
   Future<void> disconnect() async {
-    await _walletConnect.killSession();
-    isConnected.value = false;
-    currentAddress.value = "";
+    modal.killSession();
+    _credentials = null;
+    notifyListeners();
   }
+
+  @override
+  bool get isConnected => throw UnimplementedError();
 }

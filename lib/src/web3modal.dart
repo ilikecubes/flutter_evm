@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:walletconnect_qrcode_modal_dart/walletconnect_qrcode_modal_dart.dart';
+import 'package:flutter_evm/src/widgets/wallet_connect_widget.dart';
 import 'connectors/connection_provider.dart';
 import 'connectors/walletconnect_connection_provider.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
@@ -8,14 +8,12 @@ import 'web3modal_base.dart';
 
 class Web3Modal extends Web3ModalBase {
   Web3Modal({
-    required BuildContext context,
     required String bridge,
     required String name,
     required String description,
     required String url,
     required String iconUrl,
   }) : super(
-          context: context,
           bridge: bridge,
           name: name,
           description: description,
@@ -36,14 +34,15 @@ class Web3Modal extends Web3ModalBase {
   late WalletConnect _walletConnect;
 
   @override
-  Future<ConnectionProvider?> connect({int? chainId}) async {
+  Future<ConnectionProvider?> connect(BuildContext context,
+      {int? chainId, String? rpcUrl}) async {
     final walletConnectConnectionProvider = WalletConnectConnectionProvider(
       context: context,
-      walletConnect: WalletConnectQrCodeModal(
-        connector: _walletConnect,
-      ),
+      modal: generateWCModal(_walletConnect),
     );
-    await walletConnectConnectionProvider.connect();
+    walletConnectConnectionProvider.connect(
+        chainID: chainId ?? 1,
+        rpcUrl: rpcUrl ?? "https://mainnet.infura.io/v3/");
     return walletConnectConnectionProvider;
   }
 }

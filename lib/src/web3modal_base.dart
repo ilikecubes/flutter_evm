@@ -5,7 +5,6 @@ import 'connectors/connection_provider.dart';
 
 abstract class Web3ModalBase {
   Web3ModalBase({
-    required this.context,
     required this.bridge,
     required this.name,
     required this.description,
@@ -13,13 +12,12 @@ abstract class Web3ModalBase {
     required this.iconUrl,
   });
 
-  final BuildContext context;
-
   final String bridge;
   final String name;
   final String description;
   final String url;
   final String iconUrl;
 
-  Future<ConnectionProvider?> connect({int? chainId});
+  Future<ConnectionProvider?> connect(BuildContext context,
+      {int? chainId, String? rpcUrl});
 }

@@ -1,33 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:web3dart/web3dart.dart';
+import 'package:webthree/webthree.dart';
 
 abstract class ConnectionProvider extends ChangeNotifier {
-  final isConnected = ValueNotifier<bool>(false);
-
-  final currentAddress = ValueNotifier<String>("");
-
-  ConnectionProvider() {
-    isConnected.addListener(() {
-      notifyListeners();
-    });
-    currentAddress.addListener(() {
-      notifyListeners();
-    });
-  }
-
-  Future<void> connect({int? chainID});
+  Future<void> connect({required String rpcUrl, required int chainID});
 
   Future<void> disconnect();
 
-  Future<String>? call({
-    String? to,
-    String? from,
-    BigInt? value,
-    BigInt? gasLimit,
-    BigInt? gasPrice,
-    int? nounce,
-    String? data,
-    BigInt? maxFeePerGas,
-    BigInt? maxPriorityFeePerGas,
-  });
+  bool get isConnected;
+
+  Credentials? get credentials;
+
+  Web3Client? get client;
 }
