@@ -1,11 +1,12 @@
 library flutter_evm;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_evm/src/connectors/connection_provider.dart';
+import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:webthree/webthree.dart';
-import 'src/web3modal.dart' if (dart.library.html) 'src/web3modal_web.dart';
 
-export 'src/connectors/connection_provider.dart';
+import 'src/connectors/connection_provider.dart';
+import 'src/managers/connector_manager.dart';
+import 'src/wallectconnect_qrcode_modal.dart';
 
 class FlutterEVM extends ChangeNotifier {
   FlutterEVM({
@@ -27,17 +28,21 @@ class FlutterEVM extends ChangeNotifier {
   final String iconUrl;
 
   final _connectionProvider = ValueNotifier<ConnectionProvider?>(null);
-  ConnectionProvider? get connectionProvider => _connectionProvider.value;
 
   Future<void> connect(BuildContext context,
       {String? rpcUrl, int? chainId}) async {
-    _connectionProvider.value = await Web3Modal(
+    ConnectorManager.instance.update(rpcUrl: rpcUrl, chainId: chainId);
+    _connectionProvider.value = await WalletConnectQrCodeModal(
+        connector: WalletConnect(
       bridge: bridge,
-      name: name,
-      description: description,
-      url: url,
-      iconUrl: iconUrl,
-    ).connect(context, chainId: chainId, rpcUrl: rpcUrl);
+      clientMeta: PeerMeta(
+        name: name,
+        description: description,
+        url: url,
+        icons: [iconUrl],
+      ),
+    )).connect(context, chainId: chainId);
+    _connectionProvider.value?.addListener(() => notifyListeners());
     notifyListeners();
   }
 
@@ -48,8 +53,14 @@ class FlutterEVM extends ChangeNotifier {
 
   Web3Client? get client => _connectionProvider.value?.client;
 
+  bool get isCorrectChain => _connectionProvider.value?.isCorrectChain ?? false;
+
+  int? get chainId => _connectionProvider.value?.chainId;
+
   Future<void> disconnect() async {
     await _connectionProvider.value?.disconnect();
+    _connectionProvider.value?.removeListener(() => notifyListeners());
+    _connectionProvider.value = null;
     notifyListeners();
   }
 }

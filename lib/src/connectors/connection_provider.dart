@@ -10,5 +10,9 @@ abstract class ConnectionProvider extends ChangeNotifier {
 
   Credentials? get credentials;
 
+  int? get chainId;
+
+  bool get isCorrectChain;
+
   Web3Client? get client;
 }

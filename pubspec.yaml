@@ -19,9 +19,6 @@ dependencies:
   qr_flutter: ^4.0.0
   url_launcher: ^6.1.4
   walletconnect_dart: ^0.0.11
-  walletconnect_qrcode_modal_dart:
-    git:
-      url: "https://github.com/ilikecubes/walletconnect_qrcode_modal_dart"
   webthree: ^2.5.5+4
 
 dev_dependencies:

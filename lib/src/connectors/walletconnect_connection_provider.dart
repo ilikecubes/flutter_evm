@@ -1,18 +1,15 @@
 import 'dart:async';
 import 'package:http/http.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_evm/src/credentials/wallet_connect_credentials.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:walletconnect_qrcode_modal_dart/walletconnect_qrcode_modal_dart.dart';
 import 'package:webthree/webthree.dart';
+import '../credentials/wallet_connect_credentials.dart';
 import 'connection_provider.dart';
 
 class WalletConnectConnectionProvider extends ConnectionProvider {
-  WalletConnectConnectionProvider({required this.modal, required this.context});
+  WalletConnectConnectionProvider({required this.walletConnect});
 
-  final WalletConnectQrCodeModal modal;
-  final BuildContext context;
+  final WalletConnect walletConnect;
 
   Web3Client? _client;
   @override
@@ -20,12 +17,14 @@ class WalletConnectConnectionProvider extends ConnectionProvider {
 
   @override
   Future<void> connect({required String rpcUrl, required int chainID}) async {
-    await modal.connect(context, chainId: chainID);
     final provider =
-        EthereumWalletConnectProvider(modal.connector, chainId: chainID);
+        EthereumWalletConnectProvider(walletConnect, chainId: chainID);
     _credentials = WalletConnectCredentials(provider: provider);
     final http = Client();
     _client = Web3Client(rpcUrl, http);
+    walletConnect.on("connect", (event) => notifyListeners());
+    walletConnect.on("disconnect", (event) => notifyListeners());
+    walletConnect.on("session_update", (event) => notifyListeners());
     notifyListeners();
   }
 
@@ -35,11 +34,18 @@ class WalletConnectConnectionProvider extends ConnectionProvider {
 
   @override
   Future<void> disconnect() async {
-    modal.killSession();
+    walletConnect.killSession();
     _credentials = null;
     notifyListeners();
   }
 
   @override
-  bool get isConnected => throw UnimplementedError();
+  bool get isConnected => walletConnect.connected;
+
+  @override
+  int? get chainId => walletConnect.session.chainId;
+
+  @override
+  bool get isCorrectChain =>
+      walletConnect.session.chainId == chainId && isConnected;
 }

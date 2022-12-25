@@ -1,5 +1,6 @@
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html';
+import 'package:flutter_evm/src/managers/connector_manager.dart';
 import 'package:js/js.dart'
     if (dart.library.io) 'package:webthree/lib/src/browser/js-stub.dart'
     if (dart.library.js) 'package:js/js.dart';
@@ -29,7 +30,7 @@ class LocalConnectionProvider extends ConnectionProvider {
       return;
     }
     await eth.rawRequest('wallet_switchEthereumChain', params: [
-      JSrawRequestParams(chainId: "Ox${chainID.toRadixString(16)}")
+      JSrawRequestParams(chainId: "0x${chainID.toRadixString(16)}")
     ]);
     _credentials = await eth.requestAccount();
     notifyListeners();
@@ -49,4 +50,11 @@ class LocalConnectionProvider extends ConnectionProvider {
   Web3Client? get client => window.ethereum != null && isConnected
       ? Web3Client.custom(window.ethereum!.asRpcService())
       : null;
+
+  @override
+  int? get chainId => window.ethereum?.chainId;
+
+  @override
+  bool get isCorrectChain =>
+      ConnectorManager.instance.chainId == chainId && isConnected;
 }
