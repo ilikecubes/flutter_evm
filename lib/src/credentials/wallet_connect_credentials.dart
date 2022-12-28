@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:webthree/crypto.dart';
-import 'package:webthree/webthree.dart';
+import 'package:web3dart/crypto.dart';
+import 'package:web3dart/web3dart.dart';
 
 class WalletConnectCredentials extends CredentialsWithKnownAddress
     implements CustomTransactionSender {

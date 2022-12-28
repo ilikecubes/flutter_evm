@@ -4,10 +4,10 @@ import 'package:flutter_evm/src/managers/connector_manager.dart';
 import 'package:js/js.dart'
     if (dart.library.io) 'package:webthree/lib/src/browser/js-stub.dart'
     if (dart.library.js) 'package:js/js.dart';
-import 'package:webthree/browser.dart'
-    if (dart.library.io) 'package:webthree/lib/src/browser/dart_wrappers_stub.dart'
-    if (dart.library.js) 'package:webthree/browser.dart';
-import 'package:webthree/webthree.dart';
+import 'package:web3dart/browser.dart'
+    if (dart.library.io) 'package:web3dart/lib/src/browser/dart_wrappers_stub.dart'
+    if (dart.library.js) 'package:web3dart/browser.dart';
+import 'package:web3dart/web3dart.dart';
 
 import 'connection_provider.dart';
 

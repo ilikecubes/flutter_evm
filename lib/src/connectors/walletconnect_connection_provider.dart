@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:http/http.dart';
 
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:webthree/webthree.dart';
+import 'package:web3dart/web3dart.dart';
 import '../credentials/wallet_connect_credentials.dart';
 import 'connection_provider.dart';
 
