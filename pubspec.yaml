@@ -1,6 +1,6 @@
 name: flutter_evm
 description: A complete EVM Suite for Flutter
-version: 0.0.3
+version: 0.0.4
 repository: https://github.com/ilikecubes/flutter_evm
 issue_tracker: https://github.com/ilikecubes/flutter_evm/issues
 

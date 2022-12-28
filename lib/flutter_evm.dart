@@ -2,7 +2,7 @@ library flutter_evm;
 
 import 'package:flutter/material.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:webthree/webthree.dart';
+import 'package:web3dart/web3dart.dart';
 
 import 'src/connectors/connection_provider.dart';
 import 'src/managers/connector_manager.dart';

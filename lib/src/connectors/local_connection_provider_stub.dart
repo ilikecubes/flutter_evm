@@ -1,5 +1,5 @@
 import 'package:flutter_evm/src/connectors/connection_provider.dart';
-import 'package:webthree/webthree.dart';
+import 'package:web3dart/web3dart.dart';
 
 class LocalConnectionProvider extends ConnectionProvider {
   @override
